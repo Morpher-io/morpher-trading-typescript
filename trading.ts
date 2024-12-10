@@ -149,8 +149,8 @@ export class MorpherTrading {
                 goodUntil,
                 goodFrom,
             ],
-            account: this.account.address,
-            gasLimit: 2000000n,
+            // account: this.account.address,
+            // gasLimit: 2000000n,
         });
 
         return this._getOrderId(txHash);
@@ -238,8 +238,8 @@ export class MorpherTrading {
                 goodUntil,
                 goodFrom,
             ],
-            account: this.account.address,
-            gasLimit: 2000000n,
+            // account: this.account.address,
+            // gasLimit: 2000000n,
         });
 
         return this._getOrderId(txHash);
