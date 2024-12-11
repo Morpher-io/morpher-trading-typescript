@@ -2,11 +2,13 @@
 
 A TypeScript-based trading bot that executes trades on the Morpher Plasma Sidechain using a Simple Moving Average (SMA) strategy. Instead of traditional brokers, it leverages blockchain transactions for trading operations while using Binance's websocket feed for real-time price data.
 
+More Information on https://tradingbot.morpher.com
+
 ## Features
 
 - Trades on Morpher's Plasma Sidechain (Chain ID: 21)
 - Uses Binance's real-time BTC/USDT price feed
-- Implements Simple Moving Average (SMA) strategy
+- Implements Simple Moving Average (SMA) cross strategy
 - Supports both long and short positions
 - Automatic stop-loss and take-profit management
 - Configurable leverage, position size, and SMA parameters
@@ -21,8 +23,9 @@ A TypeScript-based trading bot that executes trades on the Morpher Plasma Sidech
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/Morpher-io/morpher-trading-typescript.git
+cd morpher-trading-typescript
+cp .env.example .env
 ```
 
 2. Install dependencies:
@@ -74,10 +77,6 @@ The bot interacts with the following Morpher contracts on the sidechain:
 ## Security
 
 **Important:** Never commit your private key to the repository. Use environment variables or a secure configuration file.
-
-## License
-
-[Add your license here]
 
 ## Disclaimer
 
