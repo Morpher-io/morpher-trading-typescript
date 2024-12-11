@@ -8,7 +8,7 @@ const MPH_TOKENS = 5
 const MOVING_AVERAGE_PERIOD = 5 // 5 minutes
 const THRESHOLD_PERCENTAGE = 0.1 // Open position if price is over / under 0.1% of moving average
 
-const tradingEngine = new MorpherTrading("0xYourPrivateKey")
+const tradingEngine = new MorpherTrading(process.env.PRIVATE_KEY)
 
 const strategy = new SimpleMovingAverageStrategy(
     tradingEngine,
