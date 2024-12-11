@@ -15,9 +15,8 @@ More Information on https://tradingbot.morpher.com
 
 ## Prerequisites
 
-- Node.js
-- npm/yarn
-- A private key with MPH tokens on Morpher Sidechain
+- bun (or ts) https://bun.sh/
+- A private key with MPH tokens on Morpher Sidechain (https://www.morpher.com/trade)
 
 ## Installation
 
@@ -30,7 +29,7 @@ cp .env.example .env
 
 2. Install dependencies:
 ```bash
-npm install
+bun install
 ```
 
 ## Configuration
@@ -49,7 +48,7 @@ The bot requires the following parameters:
 1. Configure your trading parameters
 2. Run the bot:
 ```bash
-npm start
+bun main.ts
 ```
 
 ## Trading Strategy
