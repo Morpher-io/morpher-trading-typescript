@@ -27,7 +27,7 @@ export default class SimpleMovingAverageStrategy {
 
     constructor(tradingEngine: MorpherTrading) {
         this.trading = tradingEngine;
-        this.marketId = process.env.MARKET_ID || "CRYPTO_BTC";
+        this.marketId = keccak256(toHex(process.env.MARKET_ID || "CRYPTO_BTC"));
         this.leverage = Number(process.env.LEVERAGE || 10.0);
         this.mphTokens = Number(process.env.MPH_TOKENS || 5);
         this.movingAveragePeriod = Number(process.env.MOVING_AVERAGE_PERIOD || 5);
