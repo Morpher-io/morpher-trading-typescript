@@ -1,5 +1,6 @@
 import { WebSocket } from "ws";
 import { MorpherTrading } from "../trading";
+import { keccak256, toHex } from 'viem';
 
 interface Position {
     is_long: boolean;
@@ -24,20 +25,13 @@ export default class SimpleMovingAverageStrategy {
     private currentPosition: Position | null = null;
     private executing: boolean = false;
 
-    constructor(
-        tradingEngine: MorpherTrading,
-        marketId: string,
-        leverage: number,
-        tradingSize: number,
-        smaPeriod: number,
-        triggerThreshold: number
-    ) {
+    constructor(tradingEngine: MorpherTrading) {
         this.trading = tradingEngine;
-        this.marketId = marketId;
-        this.leverage = leverage;
-        this.mphTokens = tradingSize;
-        this.movingAveragePeriod = smaPeriod;
-        this.thresholdPercentage = triggerThreshold;
+        this.marketId = process.env.MARKET_ID || "CRYPTO_BTC";
+        this.leverage = Number(process.env.LEVERAGE || 10.0);
+        this.mphTokens = Number(process.env.MPH_TOKENS || 5);
+        this.movingAveragePeriod = Number(process.env.MOVING_AVERAGE_PERIOD || 5);
+        this.thresholdPercentage = Number(process.env.THRESHOLD_PERCENTAGE || 0.1);
     }
 
     private calculateMovingAverage(prices: number[]): number {
