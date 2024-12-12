@@ -1,14 +1,20 @@
 import { MorpherTrading } from './trading';
 import SimpleMovingAverageStrategy from './strategies/sma';
+import { keccak256, toHex } from 'viem';
 
 // BTC market
-const MARKET_ID = "0x0bc89e95f9fdaab7e8a11719155f2fd638cb0f665623f3d12aab71d1a125daf9"
+const MARKET_ID = keccak256(toHex(process.env.MARKET_ID || "CRYPTO_BTC"));
 const LEVERAGE = 10.0
 const MPH_TOKENS = 5
 const MOVING_AVERAGE_PERIOD = 5 // 5 minutes
 const THRESHOLD_PERCENTAGE = 0.1 // Open position if price is over / under 0.1% of moving average
 
-const tradingEngine = new MorpherTrading(process.env.PRIVATE_KEY)
+if(process.env.PRIVATE_KEY == undefined) {
+    console.error("Private Key is not set, aborting");
+    process.exit(1)
+}
+
+const tradingEngine = new MorpherTrading(process.env.PRIVATE_KEY as `0x${string}`);
 
 const strategy = new SimpleMovingAverageStrategy(
     tradingEngine,
