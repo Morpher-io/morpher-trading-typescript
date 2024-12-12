@@ -182,7 +182,7 @@ export default class SimpleMovingAverageStrategy {
     public async startTrading(): Promise<void> {
         console.log("Launching bot...");
         console.log(`User balance: ${await this.trading.getBalance()} MPH`);
-        const url = "wss://stream.binance.com:9443/ws/btcusdt@trade";
+        const url = `wss://stream.binance.com:9443/ws/${process.env.BINANCE_MARKET || 'btcusdt'}@trade`;
         const ws = new WebSocket(url);
 
         ws.on("message", (message: string) => this.onMessage(message));
