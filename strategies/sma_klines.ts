@@ -184,32 +184,28 @@ export default class SimpleMovingAverageStrategy {
         console.log(`Initialized with ${this.minutePrices.length} historical prices`);
         console.log(`Current SMA: ${this.calculateMovingAverage(this.minutePrices).toFixed(2)}`);
 
-        // Start processing position logic with historical data
+        // Process initial position logic with historical data
         await this.processPositionLogic();
 
-        // Set up WebSocket for real-time price updates
-        const wsUrl = `wss://stream.binance.com:9443/ws/${market.toLowerCase()}@kline_1m`;
-        const ws = new WebSocket(wsUrl);
-
-        ws.on("message", (message: string) => {
-            const data = JSON.parse(message);
-            if (data.k?.x) { // Kline closed
-                const closePrice = parseFloat(data.k.c);
-                this.processPrice(closePrice);
-                this.processPositionLogic();
+        // Set up polling interval (every minute)
+        const market = process.env.BINANCE_MARKET?.toUpperCase() || 'SOLUSDT';
+        console.log(`Starting price polling for ${market}...`);
+        
+        setInterval(async () => {
+            try {
+                // Fetch latest kline
+                const url = `https://api.binance.com/api/v3/klines?symbol=${market}&interval=1m&limit=1`;
+                const result = await fetch(url);
+                const candles = await result.json();
+                
+                if (candles && candles.length > 0) {
+                    const closePrice = parseFloat(candles[0][4]); // Close price is at index 4
+                    this.processPrice(closePrice);
+                    await this.processPositionLogic();
+                }
+            } catch (error) {
+                console.error('Error fetching price:', error);
             }
-        });
-
-        ws.on("error", (error: Error) => {
-            console.error("WebSocket error:", error);
-            setTimeout(() => this.startTrading(), 5000); // Reconnect after 5 seconds
-        });
-
-        ws.on("close", () => {
-            console.log("WebSocket connection closed, attempting to reconnect...");
-            setTimeout(() => this.startTrading(), 5000);
-        });
-
-        console.log(`Starting WebSocket stream for ${market}...`);
+        }, 60000); // Poll every minute
     }
 }
