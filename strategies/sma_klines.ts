@@ -38,26 +38,6 @@ export default class SimpleMovingAverageStrategy {
         return prices.reduce((a, b) => a + b, 0) / prices.length;
     }
 
-    private processPrice(price: number): void {
-        const currentMin = new Date();
-        currentMin.setSeconds(0, 0);
-
-        if (this.currentMinute === null) {
-            this.currentMinute = currentMin;
-        }
-
-        if (currentMin > this.currentMinute) {
-            if (this.lastPrice !== null) {
-                this.minutePrices.push(this.lastPrice);
-                if (this.minutePrices.length > this.movingAveragePeriod) {
-                    this.minutePrices.shift();
-                }
-                console.log(`[${new Date()}] Minute closed: ${this.currentMinute}, Price: ${this.lastPrice}`);
-            }
-            this.currentMinute = currentMin;
-        }
-        this.lastPrice = price;
-    }
 
     private async openLongPosition(price: number, ma: number): Promise<void> {
         const orderId = await this.trading.openPosition(
@@ -192,18 +172,20 @@ export default class SimpleMovingAverageStrategy {
         
         setInterval(async () => {
             try {
-                // Fetch latest kline
-                const url = `https://api.binance.com/api/v3/klines?symbol=${market}&interval=1m&limit=1`;
+                // Fetch complete set of recent candles
+                const url = `https://api.binance.com/api/v3/klines?symbol=${market}&interval=1m&limit=${this.movingAveragePeriod}`;
                 const result = await fetch(url);
                 const candles = await result.json();
                 
-                if (candles && candles.length > 0) {
-                    const closePrice = parseFloat(candles[0][4]); // Close price is at index 4
-                    this.processPrice(closePrice);
+                if (candles && candles.length === this.movingAveragePeriod) {
+                    // Update entire price array
+                    this.minutePrices = candles.map((candle: any[]) => parseFloat(candle[4]));
+                    this.lastPrice = this.minutePrices[this.minutePrices.length - 1];
+                    console.log(`[${new Date()}] Updated prices, latest: ${this.lastPrice}`);
                     await this.processPositionLogic();
                 }
             } catch (error) {
-                console.error('Error fetching price:', error);
+                console.error('Error fetching prices:', error);
             }
         }, 60000); // Poll every minute
     }
