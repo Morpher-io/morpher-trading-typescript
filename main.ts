@@ -1,5 +1,5 @@
 import { MorpherTrading } from './trading';
-import SimpleMovingAverageStrategy from './strategies/sma';
+import SimpleMovingAverageStrategy from './strategies/sma_klines';
 
 if (process.env.PRIVATE_KEY == undefined) {
     console.error("Private Key is not set, aborting");

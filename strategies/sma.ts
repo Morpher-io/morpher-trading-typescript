@@ -1,3 +1,9 @@
+/**
+ * This Strategy uses the Binance Websocket for generating the 1 minute SMA bars
+ * 
+ * The problem is the socket sometimes gets closed unexpectedly. So it might be better to just download the klines (candlesticks) every x minutes (in sma_klines.ts)
+ */
+
 import { WebSocket } from "ws";
 import { MorpherTrading } from "../trading";
 import { keccak256, toHex } from 'viem';

@@ -20,7 +20,7 @@ export default class SimpleMovingAverageStrategy {
     private currentMinute: Date | null = null;
     private lastPrice: number | null = null;
 
-    private lastPrint: number = Date.now();
+    private lastPrint: number = 0;
 
     private currentPosition: Position | null = null;
     private executing: boolean = false;
@@ -85,9 +85,9 @@ export default class SimpleMovingAverageStrategy {
                 const sl = this.currentPosition.stop_loss;
                 const tp = this.currentPosition.take_profit;
                 const pv = await this.trading.getPositionValue(this.marketId, lastPrice);
-                console.log(`[${new Date()}] Price: ${lastPrice}, Position value: ${pv.toFixed(2)}, SL: ${sl.toFixed(2)}, TP: ${tp.toFixed(2)}`);
+                console.log(`[${(new Date()).toISOString()}] Price: ${lastPrice}, Position value: ${pv.toFixed(2)}, SL: ${sl.toFixed(2)}, TP: ${tp.toFixed(2)}`);
             } else {
-                console.log(`[${new Date()}] Price: ${lastPrice}, MA: ${movingAverage.toFixed(2)}, Lower: ${lowerThreshold.toFixed(2)}, Upper: ${upperThreshold.toFixed(2)}`);
+                console.log(`\n=== ${(new Date()).toISOString()} ===\nPrice: ${lastPrice}\nMA: ${movingAverage.toFixed(2)}\nOpen Long: Price <= ${lowerThreshold.toFixed(2)}\nOpen Short: Price >= ${upperThreshold.toFixed(2)}\n`);
             }
         }
 
@@ -187,6 +187,6 @@ export default class SimpleMovingAverageStrategy {
             } catch (error) {
                 console.error('Error fetching prices:', error);
             }
-        }, 60000); // Poll every minute
+        }, 10000); // Poll every 10 seconds
     }
 }
