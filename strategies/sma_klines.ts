@@ -169,59 +169,47 @@ export default class SimpleMovingAverageStrategy {
     public async startTrading(): Promise<void> {
         console.log("Launching bot...");
         console.log(`User balance: ${await this.trading.getBalance()} MPH`);
-        const url = `https://api.binance.com/api/v3/klines?symbol=${process.env.BINANCE_MARKET?.toUpperCase() || 'SOLUSDT'}&interval=1m&limit=${this.movingAveragePeriod}`
+        // Get historical klines data
+        const market = process.env.BINANCE_MARKET?.toUpperCase() || 'SOLUSDT';
+        const url = `https://api.binance.com/api/v3/klines?symbol=${market}&interval=1m&limit=${this.movingAveragePeriod}`;
         const result = await fetch(url);
         const candles = await result.json();
-        
 
-        /**
-         * Result:
-         * 
-         * [
-  [
-    1499040000000,      // Kline open time
-    "0.01634790",       // Open price
-    "0.80000000",       // High price
-    "0.01575800",       // Low price
-    "0.01577100",       // Close price
-    "148976.11427815",  // Volume
-    1499644799999,      // Kline Close time
-    "2434.19055334",    // Quote asset volume
-    308,                // Number of trades
-    "1756.87402397",    // Taker buy base asset volume
-    "28.46694368",      // Taker buy quote asset volume
-    "0"                 // Unused field, ignore.
-  ]
-]
-  e.g.:
+        // Extract close prices (index 4) from klines data
+        this.minutePrices = candles.map((candle: any[]) => parseFloat(candle[4]));
+        this.currentMinute = new Date();
+        this.currentMinute.setSeconds(0, 0);
+        this.lastPrice = this.minutePrices[this.minutePrices.length - 1];
 
-[
-  [
-    1734078840000, "226.01000000", "226.03000000", "225.93000000", "225.93000000", "1230.48900000",
-    1734078899999, "278061.14351000", 944, "796.21000000", "179926.38472000", "0"
-  ], [
-    1734078900000, "225.92000000", "226.06000000", "225.90000000", "226.02000000", "882.06600000",
-    1734078959999, "199350.88894000", 738, "516.01900000", "116616.15394000", "0"
-  ], [
-    1734078960000, "226.01000000", "226.01000000", "225.73000000", "225.77000000", "1999.68300000",
-    1734079019999, "451633.59879000", 1337, "913.65100000", "206345.77734000", "0"
-  ], [
-    1734079020000, "225.77000000", "225.78000000", "225.65000000", "225.70000000", "1820.73300000",
-    1734079079999, "410927.19384000", 1087, "795.08600000", "179457.09280000", "0"
-  ], [
-    1734079080000, "225.70000000", "225.95000000", "225.67000000", "225.94000000", "1695.01500000",
-    1734079139999, "382768.40522000", 1267, "1542.13400000", "348247.03911000", "0"
-  ]
-]
-         */
-        
-        // const url = `wss://stream.binance.com:9443/ws/${process.env.BINANCE_MARKET || 'btcusdt'}@trade`;
-        // const ws = new WebSocket(url);
+        console.log(`Initialized with ${this.minutePrices.length} historical prices`);
+        console.log(`Current SMA: ${this.calculateMovingAverage(this.minutePrices).toFixed(2)}`);
 
-        // ws.on("message", (message: string) => this.onMessage(message));
-        // ws.on("error", (error: Error) => this.onError(error));
-        // ws.on("close", () => this.onClose());
+        // Start processing position logic with historical data
+        await this.processPositionLogic();
 
-        console.log("Starting WebSocket stream...");
+        // Set up WebSocket for real-time price updates
+        const wsUrl = `wss://stream.binance.com:9443/ws/${market.toLowerCase()}@kline_1m`;
+        const ws = new WebSocket(wsUrl);
+
+        ws.on("message", (message: string) => {
+            const data = JSON.parse(message);
+            if (data.k?.x) { // Kline closed
+                const closePrice = parseFloat(data.k.c);
+                this.processPrice(closePrice);
+                this.processPositionLogic();
+            }
+        });
+
+        ws.on("error", (error: Error) => {
+            console.error("WebSocket error:", error);
+            setTimeout(() => this.startTrading(), 5000); // Reconnect after 5 seconds
+        });
+
+        ws.on("close", () => {
+            console.log("WebSocket connection closed, attempting to reconnect...");
+            setTimeout(() => this.startTrading(), 5000);
+        });
+
+        console.log(`Starting WebSocket stream for ${market}...`);
     }
 }
