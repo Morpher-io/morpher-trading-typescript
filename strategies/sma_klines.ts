@@ -188,7 +188,6 @@ export default class SimpleMovingAverageStrategy {
         await this.processPositionLogic();
 
         // Set up polling interval (every minute)
-        const market = process.env.BINANCE_MARKET?.toUpperCase() || 'SOLUSDT';
         console.log(`Starting price polling for ${market}...`);
         
         setInterval(async () => {
