@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "axios": "^1.7.9",
     "viem": "^2.21.54"
   },
   "name": "morpher-trading-typescript",
